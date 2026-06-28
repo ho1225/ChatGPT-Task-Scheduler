@@ -9,9 +9,9 @@ pip install -r requirements.txt
 
 You also need **Node.js** for `npx` (used by the MCP inspector for verification).
 
-### Files to Fill In
+### Design Decision
 
-| File                | TODO                                    | Design Decision                                     |
+| File                | FUNCTION                                | Design Decision                                     |
 | ------------------- | --------------------------------------- | --------------------------------------------------- |
 | `app/scheduler.py`  | `get_time_bucket()` + `find_due_jobs()` | Time bucket partitioning for efficient job scanning |
 | `app/mcp_server.py` | `TOOL_REGISTRY` + `route_tool_call()`   | Registry pattern for MCP tool routing               |
