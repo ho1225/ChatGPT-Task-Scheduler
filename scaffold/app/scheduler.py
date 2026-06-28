@@ -50,6 +50,25 @@ def schedule_next_occurrence(job: Job, db: Session) -> None:
     db.commit()
 
 
+def release_triggered_jobs(parent_job: Job, db: Session) -> None:
+    """Release child jobs that are waiting for this parent job to complete."""
+    waiting_jobs = (
+        db.query(Job)
+        .filter(Job.trigger_after_job_id == parent_job.id, Job.status == "pending")
+        .all()
+    )
+    if not waiting_jobs:
+        return
+
+    now = _utcnow()
+    for job in waiting_jobs:
+        job.scheduled_at = now
+        job.time_bucket = get_time_bucket(now)
+        job.status = "pending"
+
+    db.commit()
+
+
 def find_due_jobs(current_time: datetime, db: Session) -> list[Job]:
     time_bucket = get_time_bucket(current_time)
     return (
@@ -94,6 +113,8 @@ def worker_loop():
             job.result = f"Executed: {job.description}"
             job.status = "completed"
             db.commit()
+
+            release_triggered_jobs(job, db)
 
             if job.cron_expression:
                 schedule_next_occurrence(job, db)

@@ -145,6 +145,7 @@ def handle_create_task(
     description: str,
     scheduled_at: str | None = None,
     cron_expression: str | None = None,
+    trigger_after_job_id: int | None = None,
 ) -> dict:
     """Create a new scheduled job."""
     parsed = parse_task_request(description, scheduled_at=scheduled_at)
@@ -165,6 +166,7 @@ def handle_create_task(
         scheduled_at=dt,
         time_bucket=get_time_bucket(dt),
         cron_expression=cron_expression,
+        trigger_after_job_id=trigger_after_job_id,
     )
     db.add(job)
     db.commit()
@@ -238,6 +240,10 @@ TOOL_DEFINITIONS: list[Tool] = [
                 "cron_expression": {
                     "type": "string",
                     "description": "Optional cron expression for recurring jobs, e.g. 0 9 * * *",
+                },
+                "trigger_after_job_id": {
+                    "type": "integer",
+                    "description": "Optional job ID that must complete before this job becomes runnable",
                 },
             },
             "required": ["description"],
